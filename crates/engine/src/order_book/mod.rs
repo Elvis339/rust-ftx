@@ -1,17 +1,14 @@
-use crate::order::{Order, OrderType};
-use sorted_insert::{SortedInsert, SortedInsertByKey};
-use std::cmp::Reverse;
 use std::collections::BinaryHeap;
+
+use anyhow::anyhow;
+use sorted_insert::{SortedInsertByKey};
+
+use crate::order::{Order, OrderType};
 
 #[derive(Debug)]
 pub struct OrderBook {
     buy_orders: BinaryHeap<Order>,
     sell_orders: Vec<Order>,
-}
-
-#[derive(PartialEq, Debug)]
-pub enum OrderError {
-    InvalidOrderTypeError,
 }
 
 impl<'a> OrderBook {
@@ -30,24 +27,24 @@ impl<'a> OrderBook {
         &self.sell_orders
     }
 
-    pub fn append_buy_order(&mut self, order: Order) -> Result<(), OrderError> {
+    pub fn append_buy_order(&mut self, order: Order) -> anyhow::Result<()> {
         match order.order_type {
             OrderType::Buy => {
                 self.buy_orders.push(order);
                 Ok(())
             }
-            _ => Err(OrderError::InvalidOrderTypeError),
+            _ => Err(anyhow!("Invalid order type, expected Buy order type but Sell provided"))
         }
     }
 
-    pub fn append_sell_order(&mut self, order: Order) -> Result<(), OrderError> {
+    pub fn append_sell_order(&mut self, order: Order) -> anyhow::Result<()> {
         match order.order_type {
             OrderType::Sell => {
                 self.sell_orders
                     .sorted_insert_asc_by_key(order, |o| &o.price);
                 Ok(())
             }
-            _ => Err(OrderError::InvalidOrderTypeError),
+            _ => Err(anyhow!("Invalid order type, expected Sell order type but Buy provided")),
         }
     }
 }
@@ -67,10 +64,9 @@ mod tests {
     fn should_not_add_sell_order_to_buy_order() {
         let mut order_book = OrderBook::new();
         let sell = Order::new(1, 8, OrderType::Sell);
-        assert_eq!(
-            order_book.append_buy_order(sell).unwrap_err(),
-            OrderError::InvalidOrderTypeError,
-        );
+        let error = order_book.append_buy_order(sell).unwrap_err();
+
+        assert_eq!(format!("{}", error), "Invalid order type, expected Buy order type but Sell provided");
         assert_eq!(order_book.get_buy_orders().len(), 0);
         assert_eq!(order_book.get_sell_orders().len(), 0);
     }
@@ -79,10 +75,9 @@ mod tests {
     fn should_not_add_buy_order_to_sell_order() {
         let mut order_book = OrderBook::new();
         let buy = Order::new(1, 8, OrderType::Buy);
-        assert_eq!(
-            order_book.append_sell_order(buy).unwrap_err(),
-            OrderError::InvalidOrderTypeError,
-        );
+        let error = order_book.append_sell_order(buy).unwrap_err();
+
+        assert_eq!(format!("{}", error), "Invalid order type, expected Sell order type but Buy provided");
         assert_eq!(order_book.get_buy_orders().len(), 0);
         assert_eq!(order_book.get_sell_orders().len(), 0);
     }
