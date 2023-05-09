@@ -1,7 +1,7 @@
 use std::collections::BinaryHeap;
 
 use anyhow::anyhow;
-use sorted_insert::{SortedInsertByKey};
+use sorted_insert::SortedInsertByKey;
 
 use crate::order::{Order, OrderType};
 
@@ -33,7 +33,9 @@ impl<'a> OrderBook {
                 self.buy_orders.push(order);
                 Ok(())
             }
-            _ => Err(anyhow!("Invalid order type, expected Buy order type but Sell provided"))
+            _ => Err(anyhow!(
+                "Invalid order type, expected Buy order type but Sell provided"
+            )),
         }
     }
 
@@ -44,7 +46,9 @@ impl<'a> OrderBook {
                     .sorted_insert_asc_by_key(order, |o| &o.price);
                 Ok(())
             }
-            _ => Err(anyhow!("Invalid order type, expected Sell order type but Buy provided")),
+            _ => Err(anyhow!(
+                "Invalid order type, expected Sell order type but Buy provided"
+            )),
         }
     }
 }
@@ -66,7 +70,10 @@ mod tests {
         let sell = Order::new(1, 8, OrderType::Sell);
         let error = order_book.append_buy_order(sell).unwrap_err();
 
-        assert_eq!(format!("{}", error), "Invalid order type, expected Buy order type but Sell provided");
+        assert_eq!(
+            format!("{}", error),
+            "Invalid order type, expected Buy order type but Sell provided"
+        );
         assert_eq!(order_book.get_buy_orders().len(), 0);
         assert_eq!(order_book.get_sell_orders().len(), 0);
     }
@@ -77,7 +84,10 @@ mod tests {
         let buy = Order::new(1, 8, OrderType::Buy);
         let error = order_book.append_sell_order(buy).unwrap_err();
 
-        assert_eq!(format!("{}", error), "Invalid order type, expected Sell order type but Buy provided");
+        assert_eq!(
+            format!("{}", error),
+            "Invalid order type, expected Sell order type but Buy provided"
+        );
         assert_eq!(order_book.get_buy_orders().len(), 0);
         assert_eq!(order_book.get_sell_orders().len(), 0);
     }
