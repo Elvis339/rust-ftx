@@ -12,7 +12,6 @@ pub enum OrderType {
 pub enum OrderStatus {
     Filled,
     Active,
-    Partial,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

@@ -69,6 +69,7 @@ name = "engine"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "lazy_static",
  "sorted-insert",
  "uuid",
 ]
@@ -383,6 +384,12 @@ checksum = "68c16e1bfd491478ab155fd8b4896b86f9ede344949b641e61501e07c2b8b4d5"
 dependencies = [
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "lazy_static"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
