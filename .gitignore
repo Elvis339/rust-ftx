@@ -3,3 +3,6 @@
 .idea
 .DS_Store
 crates/client/dist
+/modules/**/*/node_modules
+node_modules
+order_book.db

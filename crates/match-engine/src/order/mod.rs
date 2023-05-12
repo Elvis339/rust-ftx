@@ -1,22 +1,20 @@
 use std::cmp::Ordering;
+use serde::{Deserialize, Serialize};
 
-use uuid::Uuid;
-
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum OrderType {
     Buy,
     Sell,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum OrderStatus {
     Filled,
     Active,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Order {
-    pub id: Uuid,
     pub price: i32,
     pub quantity: i32,
     pub order_type: OrderType,
@@ -26,7 +24,6 @@ pub struct Order {
 impl Order {
     pub fn new(quantity: i32, price: i32, order_type: OrderType) -> Self {
         Self {
-            id: Uuid::new_v4(),
             quantity,
             price,
             order_type,
