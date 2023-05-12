@@ -1,0 +1,2 @@
+# Rust FTX
+Toy project
