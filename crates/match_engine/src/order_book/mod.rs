@@ -155,6 +155,8 @@ impl OrderBook {
                 buy_orders.sorted_insert_desc_by_key(order, |o| &o.price);
                 drop(buy_orders);
 
+                self.match_orders();
+
                 let db_mutex_guard = self
                     .db
                     .as_ref()
@@ -171,8 +173,6 @@ impl OrderBook {
                     )
                     .expect("sam bankman fried");
                 drop(db_mutex_guard);
-
-                self.match_orders();
                 Ok(())
             }
             _ => Err(anyhow!(
@@ -188,6 +188,8 @@ impl OrderBook {
                 sell_orders.sorted_insert_asc_by_key(order, |o| &o.price);
                 drop(sell_orders);
 
+                self.match_orders();
+
                 let db_mutex_guard = self
                     .db
                     .as_ref()
@@ -204,8 +206,6 @@ impl OrderBook {
                     )
                     .expect("sam bankman fried");
                 drop(db_mutex_guard);
-
-                self.match_orders();
                 Ok(())
             }
             _ => Err(anyhow!(
@@ -220,7 +220,7 @@ impl OrderBook {
         let buy_orders = Arc::clone(&self.buy_orders);
         let sell_orders = Arc::clone(&self.sell_orders);
 
-        thread::spawn(move || {
+        let t = thread::spawn(move || {
             let mut index = 0;
             while !stop.load(Ordering::Relaxed) {
                 let index_len = index + 1;
@@ -245,6 +245,8 @@ impl OrderBook {
                 index += 1;
             }
         });
+
+        t.join().expect("could not join thread");
     }
 }
 
@@ -339,8 +341,6 @@ mod tests {
                     .expect("could not append sell order");
             }
         }
-
-        thread::sleep(Duration::from_secs(10));
 
         let filled_buy_orders: Vec<i32> = order_book
             .get_filled_buy_orders()

@@ -35,8 +35,8 @@ fn main() {
                 println!("Active orders={:?}", item.active_orders);
                 println!("Fulfilled orders={:?}", item.fulfilled_orders);
             }
-            "create_order" => {
-                let err_msg = "Invalid usage! Example: create order btc/usd [[represents pair]] buy [[or sell]] 10 [[price]] 3 [[quantity]] (default: 1)";
+            "order" => {
+                let err_msg = "Invalid usage! Example: order btc/usd [[represents pair]] buy [[or sell]] 10 [[price]] 3 [[quantity]] (default: 1)";
                 let pair = env::args().nth(3).expect(err_msg);
                 let order_type = env::args()
                     .nth(4)
