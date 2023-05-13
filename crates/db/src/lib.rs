@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use sled::{Db, IVec};
 
 #[derive(Debug, Clone)]
@@ -26,13 +27,17 @@ impl Database {
         self.inner.insert(key, stringify.as_bytes())
     }
 
-    pub fn get(&self, key: &String) -> String {
-        let key = self
-            .inner
-            .get(&key)
-            .expect(format!("Failed to get {}", key).as_str())
-            .expect(format!("{} does not exist", key).as_str());
-        String::from_utf8(key.to_vec()).expect("Could not convert Vec<u8> to String")
+    pub fn get(&self, key: &String) -> anyhow::Result<Option<String>> {
+        match self.inner.get(&key) {
+            Ok(value) => match value {
+                Some(result) => Ok(Some(
+                    String::from_utf8(result.to_vec())
+                        .expect("Could not convert Vec<u8> to String"),
+                )),
+                None => Ok(None),
+            },
+            Err(_) => Ok(None),
+        }
     }
 }
 
@@ -41,8 +46,9 @@ mod tests {
     use crate::Database;
     use rand::prelude::*;
     use serde::{Deserialize, Serialize};
-    use std::fs;
     use std::path::Path;
+    use std::time::Duration;
+    use std::{fs, thread};
 
     #[derive(Debug, Serialize, Deserialize)]
     struct Complex {
@@ -90,7 +96,7 @@ mod tests {
         let key = "BTC/USD".to_string();
         db.set(&key, &complex).expect("failed to insert");
 
-        let stringified = db.get(&key);
+        let stringified = db.get(&key).unwrap().unwrap();
         let converted: Complex =
             serde_json::from_str(&*stringified).expect("failed to deserialize");
 
@@ -102,6 +108,8 @@ mod tests {
 
     #[test]
     fn multiple_set_latest_get() {
+        thread::sleep(Duration::from_secs(1));
+
         let db = create_mock_db();
         let btc_usdc: Vec<Complex> = gen_rnd_complex_obj(10);
 
@@ -110,7 +118,7 @@ mod tests {
         }
 
         assert_eq!(
-            db.get(&"btc/usdc".to_string()),
+            db.get(&"btc/usdc".to_string()).unwrap().unwrap(),
             serde_json::to_string(&btc_usdc[9]).unwrap()
         );
         cleanup();

@@ -1,5 +1,5 @@
 [package]
-name = "engine"
+name = "cli"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,8 +7,6 @@ edition = "2021"
 
 [dependencies]
 db = { path = "../db", version = "0.1.0", default-features = false }
-sorted-insert = "0.2.3"
-anyhow = "1.0.71"
-lazy_static = "1.4.0"
+match_engine = { path = "../match_engine", version = "0.1.0", default-features = false }
 serde = { version = "1.0.162", features = ["derive"] }
 serde_json = "1.0.96"
